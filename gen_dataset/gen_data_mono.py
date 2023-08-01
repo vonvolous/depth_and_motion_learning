@@ -30,11 +30,22 @@ from alignment import align
 
 
 SKIP = 2
-WIDTH = 416
-HEIGHT = 128
-SUB_FOLDER = 'train'
-INPUT_DIR = '/usr/local/google/home/anelia/struct2depth/CITYSCAPES_FULL/'
-OUTPUT_DIR = '/usr/local/google/home/anelia/struct2depth/CITYSCAPES_Processed/'
+# RGB
+WIDTH = 1920
+HEIGHT = 704
+
+# infra
+# WIDTH = 512
+# HEIGHT = 352
+
+SUB_FOLDER = 's_1'
+# INPUT_DIR = '/usr/local/google/home/anelia/struct2depth/CITYSCAPES_FULL'
+INPUT_DIR = '/home/cvmlserver5/dagyeong/data/infra'
+# INPUT_DIR = '/home/cvmlserver5/dagyeong/data/rgb'
+
+# OUTPUT_DIR = '/usr/local/google/home/anelia/struct2depth/CITYSCAPES_Processed/'
+OUTPUT_DIR = '/home/cvmlserver5/dagyeong/data/infra_processed/'
+# OUTPUT_DIR = '/home/cvmlserver5/dagyeong/data/rgb_processed/'
 
 def crop(img, segimg, fx, fy, cx, cy):
     # Perform center cropping, preserving 50% vertically.
@@ -68,13 +79,13 @@ def crop(img, segimg, fx, fy, cx, cy):
 
 
 def run_all():
-  dir_name=INPUT_DIR + '/leftImg8bit_sequence/' + SUB_FOLDER + '/*'
+  dir_name=INPUT_DIR + SUB_FOLDER + '/*'
   print('Processing directory', dir_name)
-  for location in glob.glob(INPUT_DIR + '/leftImg8bit_sequence/' + SUB_FOLDER + '/*'):
+  for location in glob.glob(INPUT_DIR + SUB_FOLDER + '/*'):
     location_name = os.path.basename(location)
     print('Processing location', location_name)
-    files = sorted(glob.glob(location + '/*.png'))
-    files = [file for file in files if '-seg.png' not in file]
+    files = sorted(glob.glob(location + '/*.jpg'))
+    files = [file for file in files if '-seg.jpg' not in file]
     # Break down into sequences
     sequences = {}
     seq_nr = 0
@@ -121,7 +132,7 @@ def run_all():
 
         for j in range(0, len(files), SKIP):
             img = cv2.imread(files[j])
-            segimg = cv2.imread(files[j].replace('.png', '-seg.png'))
+            segimg = cv2.imread(files[j].replace('.jpg', '-seg.jpg'))
 
             smallimg, segimg, fx_this, fy_this, cx_this, cy_this = crop(img, segimg, fx, fy, cx, cy)
             triplet.append(smallimg)
@@ -130,8 +141,8 @@ def run_all():
                 cmb = np.hstack(triplet)
                 align1, align2, align3 = align(seg_triplet[0], seg_triplet[1], seg_triplet[2])
                 cmb_seg = np.hstack([align1, align2, align3])
-                cv2.imwrite(os.path.join(output_dir, str(ct).zfill(10) + '.png'), cmb)
-                cv2.imwrite(os.path.join(output_dir, str(ct).zfill(10) + '-fseg.png'), cmb_seg)
+                cv2.imwrite(os.path.join(output_dir, str(ct).zfill(10) + '.jpg'), cmb)
+                cv2.imwrite(os.path.join(output_dir, str(ct).zfill(10) + '-fseg.jpg'), cmb_seg)
                 f = open(os.path.join(output_dir, str(ct).zfill(10) + '_cam.txt'), 'w')
                 f.write(str(fx_this) + ',0.0,' + str(cx_this) + ',0.0,' + str(fy_this) + ',' + str(cy_this) + ',0.0,0.0,1.0')
                 f.close()
@@ -141,11 +152,11 @@ def run_all():
 
 # Create file list for training. Be careful as it collects and includes all files recursively.
 fn = open(OUTPUT_DIR + '/' + SUB_FOLDER + '.txt', 'w')
-for f in glob.glob(OUTPUT_DIR + '/*/*.png'):
-    if '-seg.png' in f or '-fseg.png' in f:
+for f in glob.glob(OUTPUT_DIR + '/*/*.jpg'):
+    if '-seg.jpg' in f or '-fseg.jpg' in f:
         continue
     folder_name = f.split('/')[-2]
-    img_name = f.split('/')[-1].replace('.png', '')
+    img_name = f.split('/')[-1].replace('.jpg', '')
     fn.write(folder_name + ' ' + img_name + '\n')
 fn.close()
 
