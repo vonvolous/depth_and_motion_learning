@@ -38,14 +38,14 @@ HEIGHT = 704
 # WIDTH = 512
 # HEIGHT = 352
 
-SUB_FOLDER = 's_1'
+SUB_FOLDER = 'infra'
+# for cityscapes
 # INPUT_DIR = '/usr/local/google/home/anelia/struct2depth/CITYSCAPES_FULL'
-INPUT_DIR = '/home/cvmlserver5/dagyeong/data/infra'
-# INPUT_DIR = '/home/cvmlserver5/dagyeong/data/rgb'
-
 # OUTPUT_DIR = '/usr/local/google/home/anelia/struct2depth/CITYSCAPES_Processed/'
-OUTPUT_DIR = '/home/cvmlserver5/dagyeong/data/infra_processed/'
-# OUTPUT_DIR = '/home/cvmlserver5/dagyeong/data/rgb_processed/'
+
+INPUT_DIR = '/home/cvmlserver5/dagyeong/data'
+OUTPUT_DIR = '/home/cvmlserver5/dagyeong/data_processed/'
+
 
 def crop(img, segimg, fx, fy, cx, cy):
     # Perform center cropping, preserving 50% vertically.
@@ -79,12 +79,12 @@ def crop(img, segimg, fx, fy, cx, cy):
 
 
 def run_all():
-  dir_name=INPUT_DIR + SUB_FOLDER + '/*'
+  dir_name=INPUT_DIR + SUB_FOLDER + '/*' # "home/cvmlserver5/dagyeong/data/infra/*"
   print('Processing directory', dir_name)
-  for location in glob.glob(INPUT_DIR + SUB_FOLDER + '/*'):
-    location_name = os.path.basename(location)
+  for location in glob.glob(INPUT_DIR + SUB_FOLDER + '/*'):  
+    location_name = os.path.basename(location) # 처음엔 s_1
     print('Processing location', location_name)
-    files = sorted(glob.glob(location + '/*.jpg'))
+    files = sorted(glob.glob(location + '/*.jpg')) # 'home/cvmlserver5/dagyeong/data/infra/s_1/*.jpg'
     files = [file for file in files if '-seg.jpg' not in file]
     # Break down into sequences
     sequences = {}
@@ -92,7 +92,7 @@ def run_all():
     last_seq = ''
     last_imgnr = -1
 
-    for i in range(len(files)):
+    for i in range(len(files)): # 'i = home/cvmlserver5/dagyeong/data/infra/s_1/0000000000.jpg ...'
         seq = os.path.basename(files[i]).split('_')[1]
         nr = int(os.path.basename(files[i]).split('_')[2])
         if seq!=last_seq or last_imgnr+1!=nr:
