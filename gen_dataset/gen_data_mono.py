@@ -44,7 +44,7 @@ SUB_FOLDER = 'infra'
 # OUTPUT_DIR = '/usr/local/google/home/anelia/struct2depth/CITYSCAPES_Processed/'
 
 INPUT_DIR = '/home/cvmlserver5/dagyeong/data'
-OUTPUT_DIR = '/home/cvmlserver5/dagyeong/data_processed/'
+OUTPUT_DIR = '/home/cvmlserver5/dagyeong/data_processed'
 
 
 def crop(img, segimg, fx, fy, cx, cy):
@@ -89,23 +89,22 @@ def run_all():
     # Break down into sequences
     sequences = {}
     seq_nr = 0
-    last_seq = ''
+    # last_seq = ''
     last_imgnr = -1
 
-    for i in range(len(files)): # 'i = home/cvmlserver5/dagyeong/data/infra/s_1/0000000000.jpg ...'
-        seq = os.path.basename(files[i]).split('_')[1]
-        nr = int(os.path.basename(files[i]).split('_')[2])
-        if seq!=last_seq or last_imgnr+1!=nr:
+    for i in range(len(files)): 
+        #seq = os.path.basename(files[i]).split('_')[1] # os.path.basename=0000000000.jpg 
+        nr = int(os.path.basename(files[i]).split('.')[0]) # nr = 0000000000 ...
+        if last_imgnr+1!=nr:
             seq_nr+=1
         last_imgnr = nr
-        last_seq = seq
         if not seq_nr in sequences:
             sequences[seq_nr] = []
         sequences[seq_nr].append(files[i])
 
     for (k,v) in sequences.items():
         print('Processing sequence', k, 'with', len(v), 'elements...')
-        output_dir = OUTPUT_DIR + '/' + location_name + '_' + str(k)
+        output_dir = OUTPUT_DIR + '/' + location_name + '_' + str(k) # '/home/cvmlserver5/dagyeong/data_processed/s_1'
         if not os.path.isdir(output_dir):
             os.mkdir(output_dir)
         files = sorted(v)
